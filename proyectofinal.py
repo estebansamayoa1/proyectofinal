@@ -1,15 +1,13 @@
-import json, requests, emoji, validators 
+import json, requests, emoji, validators, csv 
 
 
 def main():
     x=0
     while x==0:
         contacts=requests.get("http://demo7130536.mockable.io/final-contacts-100")
-        open('contactos.json', 'wb').write(contacts.content)
-        with open('contactos.json', 'r') as JSON:
+        open('contactos.txt', 'wb').write(contacts.content)
+        with open('contactos.txt', 'r') as JSON:
             cjason=json.load(JSON)
-        with open('contactos.json', 'w') as fp:
-            json.dump(cjason, fp)
         #Menú Principal 
         print ("\n\n")
         print("CONTACT BOOK")
@@ -23,7 +21,8 @@ def main():
         5.Enviar Mensaje
         6.Enviar Correo
         7.Eliminar Contacto
-        8.Salir\n """))
+        8.Exportar
+        9.Salir\n """))
         print("------------------")
         #Agregar Contacto
         if opcion==1:
@@ -31,13 +30,23 @@ def main():
             letra0=nombre[0]
             letra=letra0.capitalize()
             if letra in cjason:
-                cjason[letra][nombre]={'telefono':'', 'email':'', 'company':'', 'extra':''}
                 telefono=int(input("Ingrese un número de telefono\n"))
-                cjason[letra][nombre]['telefono']=telefono
-                for contacto in cjason[letra]:
-                    print (contacto)
-
-            
+                correo=input("Ingrese un correo electronico\n")
+                if validators.email(correo)==True:
+                    compañia=input("Ingrese donde labora el contacto\n")
+                    extra=input("Extra:\n")
+                    cjason[letra]={f'{nombre}':{'telefono':f'{telefono}', 'email':f'{correo}', 'company':f'{compañia}', 'extra':f'{extra}'}}
+                    print ("\n\n")
+                    print(nombre)
+                    print (f"telefono: {cjason[letra][nombre]['telefono']}")
+                    print (f"email: {cjason[letra][nombre]['email']}")
+                    print (f"company: {cjason[letra][nombre]['company']}")
+                    print (f"extra: {cjason[letra][nombre]['extra']}")
+                    
+                else:
+                    print ("Correo invalido\n")
+                
+             
         #Ver contactos
         elif opcion==2:
             n=0
@@ -57,18 +66,14 @@ def main():
                 print ("--------------------------------")
                 print (f"{nm}.{persona}")
                 print ("--------------------------------")
-                print (cjason[letra][persona]['telefono'])
-                print (cjason[letra][persona]['email'])
-                print ("\n")
-            esp=input("Ingrese el nombre del contacto para ver el resto de los datos\n")
-            if esp in cjason[letra]:
-                print (f"{esp}")
-                print (cjason[letra][esp]['email'])
-            else: 
-                print ("Contacto Invalido")
+                print (f"->Telefono: {cjason[letra][persona]['telefono']}")
+                print (f"->E-mail: {cjason[letra][persona]['email']}")
+                print (f"->Company: {cjason[letra][persona]['company']}")
+                print (f"->Extra: {cjason[letra][persona]['extra']}")
+                print ("\n\n")
+        
             
-                
-                   
+        
         #Editar Contactos
         elif opcion==3:
             n=0
@@ -76,9 +81,7 @@ def main():
             for persona in cjason[editar]:
                 n+=1
                 print (f"{n}.{persona}")
-            per=input("Ingrese el nombre completo de la persona que desea editar\n")
-            for info in cjason[editar][per]: 
-                print (info)
+
 
    
         #Llamar Contacto
@@ -98,7 +101,7 @@ def main():
         #Enviar Mensaje
         elif opcion==5:
             n=0
-            llamar=input("Escribe una letra para filtar y buscar el contacto de la persona que deseas llamar\n")
+            llamar=input("Escribe una letra para filtar y buscar el contacto de la persona que deseas enviarle mensaje\n")
             for persona in cjason[llamar]:
                 n+=1
                 print("--------------------------------")
@@ -118,9 +121,37 @@ def main():
         
         #Enviar Correo
         elif opcion==6:
-            print("Correo")
+            n=0
+            correo=input("Escribe una letra para filtar y buscar el contacto de la persona que deseas enviarle mensaje\n")
+            for persona in cjason[correo]:
+                n+=1
+                print("--------------------------------")
+                print(f"{n}. {persona}")
+                print("--------------------------------")
+            pers=input("Escriba el nombre completo de la persona que desea enviar un mensaje\n")
+            if pers in cjason[correo]:
+                asunto=input("Asunto:")
+                mensaje=input("Escriba el mensaje:\n")
+                print ("\n\n")
+                print("-----------------------------------------------")
+                print (emoji.emojize(f"Mensaje a: {pers} al correo {cjason[correo][pers]['email']}")) 
+                print("-----------------------------------------------")
+                print (asunto)
+                print("-----------------------------------------------")
+                print (mensaje)
+                print("-----------------------------------------------")
+                print (emoji.emojize(f"Mensaje enviado:heavy_check_mark:\n"))
 
         elif opcion==8:
+            w = csv.writer(open("contactos.csv", "w"))
+            for key, cont in cjason.items():
+                w.writerow([key, cont])
+    
+        elif opcion==9:
+            contactos1 = json.dumps(cjason)
+            f = open("contactos.json","w")
+            f.write(contactos1)
+            f.close()
             print("Saliendo...")
             x=1
         
