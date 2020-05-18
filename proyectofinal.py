@@ -1,15 +1,15 @@
-import json
-import requests
-import emoji
-import validators 
-import numpy as np 
+import json, requests, emoji, validators 
 
 
 def main():
     x=0
     while x==0:
         contacts=requests.get("http://demo7130536.mockable.io/final-contacts-100")
-        cjason=contacts.json()
+        open('contactos.json', 'wb').write(contacts.content)
+        with open('contactos.json', 'r') as JSON:
+            cjason=json.load(JSON)
+        with open('contactos.json', 'w') as fp:
+            json.dump(cjason, fp)
         #Menú Principal 
         print ("\n\n")
         print("CONTACT BOOK")
@@ -21,20 +21,27 @@ def main():
         3.Editar Contactos
         4.Llamar contacto
         5.Enviar Mensaje
-        6.Salir\n """))
+        6.Enviar Correo
+        7.Eliminar Contacto
+        8.Salir\n """))
         print("------------------")
-
         #Agregar Contacto
         if opcion==1:
-            for letra in cjason:
-                for persona in cjason[letra]: 
-                    print (persona)
-                    for item in cjason[persona]:
-                        print("Key : {} , Value : {}".format(item, persona[item]))
-                
+            nombre=input("Escriba el nombre del contacto que desea agregar\n")
+            letra0=nombre[0]
+            letra=letra0.capitalize()
+            if letra in cjason:
+                cjason[letra][nombre]={'telefono':'', 'email':'', 'company':'', 'extra':''}
+                telefono=int(input("Ingrese un número de telefono\n"))
+                cjason[letra][nombre]['telefono']=telefono
+                for contacto in cjason[letra]:
+                    print (contacto)
+
+            
         #Ver contactos
         elif opcion==2:
             n=0
+            nm=0
             for letra in cjason: 
                 print (letra+":")
                 print("--------------------------------")
@@ -46,9 +53,9 @@ def main():
             letra0=input ("Ingrese una letra para filtrar los contactos que desea ver\n")
             letra=letra0.capitalize()
             for persona in cjason[letra]: 
-                n+=1
+                nm+=1
                 print ("--------------------------------")
-                print (f"{n}.{persona}")
+                print (f"{nm}.{persona}")
                 print ("--------------------------------")
                 print (cjason[letra][persona]['telefono'])
                 print (cjason[letra][persona]['email'])
@@ -63,7 +70,17 @@ def main():
                 
                    
         #Editar Contactos
-    
+        elif opcion==3:
+            n=0
+            editar=input("Escribe una letra para filtar y buscar el contacto de la persona que deseas llamar\n")
+            for persona in cjason[editar]:
+                n+=1
+                print (f"{n}.{persona}")
+            per=input("Ingrese el nombre completo de la persona que desea editar\n")
+            for info in cjason[editar][per]: 
+                print (info)
+
+   
         #Llamar Contacto
         elif opcion==4: 
             n=0
@@ -77,19 +94,36 @@ def main():
             if pers in cjason[llamar]:
                 print (emoji.emojize(f":telephone_receiver:Llamando a {pers} al {cjason[llamar][pers]['telefono']}")) 
             
-            
-            
-    
+
         #Enviar Mensaje
         elif opcion==5:
             n=0
-            numbers = [0]
-            num = 0
-            letra5=input("Escriba la primer letra del contacto al que desea enviarle un mensaje\n")
+            llamar=input("Escribe una letra para filtar y buscar el contacto de la persona que deseas llamar\n")
+            for persona in cjason[llamar]:
+                n+=1
+                print("--------------------------------")
+                print(f"{n}. {persona}")
+                print("--------------------------------")
+            pers=input("Escriba el nombre completo de la persona que desea enviar un mensaje\n")
+            if pers in cjason[llamar]:
+                mensaje=input("Escriba el mensaje:\n")
+                print ("\n\n")
+                print("-----------------------------------------------")
+                print (emoji.emojize(f"Mensaje a: {pers}")) 
+                print("-----------------------------------------------")
+                print (mensaje)
+                print("-----------------------------------------------")
+                print (emoji.emojize(f"Mensaje enviado:heavy_check_mark:\n"))
             
-                     
-        #Salir 
+        
+        #Enviar Correo
         elif opcion==6:
+            print("Correo")
+
+        elif opcion==8:
             print("Saliendo...")
-            x=1 
+            x=1
+        
+
+
 main()
